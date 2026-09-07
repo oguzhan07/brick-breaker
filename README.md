@@ -1,40 +1,38 @@
 # Brick Breaker
 
-A classic 2D brick breaker game built from scratch with **Unity 6 (URP)** and **C#**.
+A 2D brick breaker game built from scratch with Unity 6 and C#.
 
-> 👤 Developed by a 3rd-year Software Engineering student at Kütahya Dumlupınar University, Organizer @ GDG & WTM Kütahya
+## How the ball works
 
-## What this project demonstrates
+I did not use Unity's own bounce material for the ball. Instead I move the ball myself in
+`FixedUpdate` along a direction vector, and when it hits something I reflect that direction off
+the contact normal with `Vector3.Reflect`. This keeps the ball speed constant and makes the
+bounce angle predictable, which is what a brick breaker needs — a physics material can slowly
+lose or gain energy and make the ball feel wrong.
 
-- **Custom physics instead of the built-in bounce** — ball reflection is calculated manually from collision normals (`Vector3.Reflect`), with movement in `FixedUpdate` for frame-rate-independent, consistent speed
-- **Clean, layered architecture** — single-responsibility scripts communicating through references, no god-objects and no `FindObjectOfType` calls
-- **Data-driven level design** — levels are prefabs; the manager spawns, tracks and disposes of them at runtime (`Instantiate`/`Destroy` with proper cleanup)
-- **Game feel / juice** — hit feedback (scale punch, shake, color flash) implemented with DOTween, tweens properly killed before reuse to avoid animation conflicts
+## Structure
 
-## Architecture
+The game is organised in two layers:
 
 ```
-GameDirector      → top-level game flow: restart, level switching, win state
- └─ LevelManager  → spawns/destroys levels and the ball
-     └─ Level     → owns its bricks, reports back when cleared
-         └─ Brick → health, hit feedback, notifies its Level on destruction
-Ball / Player / PlayerInput → gameplay elements, each a single responsibility
+Assets/_project/Scripts/
+├── Elements/     Ball, Brick, Player, PlayerInput, Level
+└── Managers/     GameDirector, LevelManager, BrickManager
 ```
 
-Events flow upward (Brick → Level → LevelManager → GameDirector), so each script only knows about its direct owner — easy to extend with new brick types or level rules.
+- **Elements** are the objects in the scene. They know how to do one thing each.
+- **Managers** hold the game state. `GameDirector` runs the game, `LevelManager` loads levels,
+  `BrickManager` keeps track of the bricks that are still alive.
 
-## Gameplay & Controls
+Levels are prefabs, so adding a new level means making a new prefab, not writing code.
+Bricks have health and need more than one hit. Hit feedback is animated with DOTween.
 
-Control the paddle with your mouse, bounce the ball, clear all bricks to win. Bricks take multiple hits and change color as they take damage.
+## Built with
 
-| Input | Action |
-|---|---|
-| Mouse drag | Move paddle (screen-space input normalized to world space, clamped) |
-| R | Restart level |
-| E / Q | Next / previous level |
+Unity 6 (6000.3.15f1) · C# · 2D physics · DOTween
 
-## Tech
+## How to open
 
-- Unity 6000.3, Universal Render Pipeline
-- C#
-- DOTween (tweening/feedback)
+1. Install Unity 6 (6000.3.15f1) or newer.
+2. Open Unity Hub → **Add** → choose this folder.
+3. Open the main scene and press **Play**.
